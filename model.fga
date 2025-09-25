@@ -1,0 +1,32 @@
+﻿model
+  schema 1.1
+
+type User
+
+type Account
+  relations
+    define admin:  [User, User with temporary_user_grant] 
+    define editor: [User, User with temporary_user_grant] or admin 
+    define reader: [User, User with temporary_user_grant] or editor    
+type Workspace
+  relations
+    define parent: [Account]
+    define admin:  [User, User with temporary_user_grant] or admin from parent 
+    define editor: [User, User with temporary_user_grant] or editor from parent or admin 
+    define reader: [User, User with temporary_user_grant] or reader from parent or editor
+type PpgPolicy
+  relations
+    define parent: [Workspace]
+    define admin:  [User, User with temporary_user_grant] or admin from parent 
+    define editor: [User, User with temporary_user_grant] or editor from parent or admin 
+    define reader: [User, User with temporary_user_grant] or reader from parent or editor
+type CmpConfiguration
+  relations
+    define parent: [Workspace]
+    define admin:  [User, User with temporary_user_grant] or admin from parent 
+    define editor: [User, User with temporary_user_grant] or editor from parent or admin 
+    define reader: [User, User with temporary_user_grant] or reader from parent or editor
+    define reviewer: [User, User with temporary_user_grant] or admin
+condition temporary_user_grant(current_time: timestamp, grant_duration: duration, grant_time: timestamp) {
+  current_time < grant_time + grant_duration
+}
